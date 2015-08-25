@@ -29,7 +29,8 @@ public class GenerateLicense {
 		validateDays(days);
 
 		BSBeanUtils bu = new BSBeanUtils();
-//		Connection conn = bu.getConnection("com.mysql.jdbc.Driver", server, database, password, user);
+		// Connection conn = bu.getConnection("com.mysql.jdbc.Driver", server,
+		// database, password, user);
 
 		String serials = getSerialNumbers(bu, conn);
 
@@ -39,7 +40,7 @@ public class GenerateLicense {
 		BSSecurity security = new BSSecurity();
 		String licenseCrypt = security.encript3des(serials);
 
-		String licenseFile =    plusWebInf(webFolder) + File.separator + "LicenseFile.dat";
+		String licenseFile = plusWebInf(webFolder) + File.separator + "LicenseFile.dat";
 
 		PrintWriter writer = null;
 		try {
@@ -81,7 +82,7 @@ public class GenerateLicense {
 		}
 
 		if (message != null) {
-			throw new BSUserException("", message);
+			throw new BSUserException(message);
 		}
 
 	}
