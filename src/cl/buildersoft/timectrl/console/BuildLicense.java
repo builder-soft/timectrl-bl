@@ -1,39 +1,59 @@
 package cl.buildersoft.timectrl.console;
 
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import cl.buildersoft.timectrl.business.console.AbstractConsoleService;
+import cl.buildersoft.framework.util.BSConnectionFactory;
+import cl.buildersoft.timectrl.business.process.AbstractProcess;
+import cl.buildersoft.timectrl.business.process.ExecuteProcess;
 import cl.buildersoft.timectrl.security.GenerateLicense;
 
-public class BuildLicense extends AbstractConsoleService {
+public class BuildLicense extends AbstractProcess implements ExecuteProcess {
+	private static final Logger LOG = Logger.getLogger(BuildLicense.class.getName());
+
+	private String[] validArguments = { "DOMAIN" };
+
 	public static void main(String[] args) {
 		BuildLicense bl = new BuildLicense();
-		bl.doWork(args);
+		List<String> response = bl.doExecute(args);
+		for (String resp : response) {
+			LOG.log(Level.INFO, resp);
+		}
 	}
-	
-	private void doWork(String[] args) {
+
+	@Override
+	protected String[] getArguments() {
+		return this.validArguments;
+	}
+
+	@Override
+	public List<String> doExecute(String[] args) {
+		validateArguments(args, true);
+
 		GenerateLicense gl = new GenerateLicense();
-		Connection conn = getConnection();
+		BSConnectionFactory cf = new BSConnectionFactory();
+		Connection conn = cf.getConnection(args[0]);
 
-		String days = args.length == 1 ? args[0] : ("" + gl.getMaxDays());
-		String result = gl.generateLicense(conn, getWebPath(), days);
+		String days = args.length == 2 ? args[1] : gl.getMaxDays().toString();
+		String result = gl.generateLicense(conn, days);
+		cf.closeConnection(conn);
 
-		System.out.println(result);
+		ArrayList<String> out = new ArrayList<String>();
+		out.add(result);
 
 		/**
-		if (args.length < 5 || args.length > 6) {
-			showHelp(gl);
-		} else {
-			String server = args[0];
-			String database = args[1];
-			String user = args[2];
-			String password = args[3];
-			String webRoot = args[4];
-		}
-		*/
+		 * if (args.length < 5 || args.length > 6) { showHelp(gl); } else {
+		 * String server = args[0]; String database = args[1]; String user =
+		 * args[2]; String password = args[3]; String webRoot = args[4]; }
+		 */
+		return out;
 	}
 
-	/**<code>
+	/**
+	 * <code>
 	private static void showHelp(GenerateLicense gl) {
 		String example = "$> BuildLicense localhost timectrl root admin D:\\workspace\\timectrl-web\\WebContent "
 				+ gl.getMaxDays() + " \n";
@@ -55,5 +75,6 @@ public class BuildLicense extends AbstractConsoleService {
 		System.out.println();
 
 	}
-</code>*/
+</code>
+	 */
 }

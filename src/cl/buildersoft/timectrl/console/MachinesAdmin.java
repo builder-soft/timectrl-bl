@@ -10,7 +10,6 @@ import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.exception.BSSystemException;
 import cl.buildersoft.timectrl.api._zkemProxy;
-import cl.buildersoft.timectrl.business.beans.Group;
 import cl.buildersoft.timectrl.business.beans.Machine;
 import cl.buildersoft.timectrl.business.console.AbstractConsoleService;
 import cl.buildersoft.timectrl.business.services.MachineService2;
@@ -18,6 +17,7 @@ import cl.buildersoft.timectrl.business.services.impl.MachineServiceImpl2;
 import cl.buildersoft.timectrl.security.GenerateLicense;
 
 public class MachinesAdmin extends AbstractConsoleService {
+	private String[] validArguments = { "DOMAIN" };
 
 	public static void main(String[] args) {
 		try {
@@ -61,7 +61,7 @@ public class MachinesAdmin extends AbstractConsoleService {
 				break;
 			case 5: // Salir
 				GenerateLicense gl = new GenerateLicense();
-				gl.generateLicense(conn, this.getWebPath(), "" + gl.getMaxDays());
+				gl.generateLicense(conn, gl.getMaxDays().toString());
 				keep = false;
 				break;
 			default:
@@ -165,8 +165,6 @@ public class MachinesAdmin extends AbstractConsoleService {
 		}
 		return machine;
 	}
-
-	
 
 	private void listMachines(Connection conn, BSBeanUtils bu) {
 		@SuppressWarnings("unchecked")
