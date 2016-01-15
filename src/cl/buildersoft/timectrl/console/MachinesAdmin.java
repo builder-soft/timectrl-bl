@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.util.List;
+import java.util.logging.Logger;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
@@ -12,24 +13,35 @@ import cl.buildersoft.framework.exception.BSSystemException;
 import cl.buildersoft.timectrl.api._zkemProxy;
 import cl.buildersoft.timectrl.business.beans.Machine;
 import cl.buildersoft.timectrl.business.console.AbstractConsoleService;
+import cl.buildersoft.timectrl.business.process.AbstractProcess;
+import cl.buildersoft.timectrl.business.process.ExecuteProcess;
 import cl.buildersoft.timectrl.business.services.MachineService2;
 import cl.buildersoft.timectrl.business.services.impl.MachineServiceImpl2;
 import cl.buildersoft.timectrl.security.GenerateLicense;
 
-public class MachinesAdmin extends AbstractConsoleService {
+public class MachinesAdmin extends AbstractProcess implements ExecuteProcess {
+	private static final Logger LOG = Logger.getLogger(MachinesAdmin.class.getName());
+
 	private String[] validArguments = { "DOMAIN" };
 
 	public static void main(String[] args) {
 		try {
 			MachinesAdmin machinesAdmin = new MachinesAdmin();
 			machinesAdmin.init();
-			machinesAdmin.doWork(args);
+			machinesAdmin.doExecute(args);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	private void doWork(String[] args) {
+	@Override
+	protected String[] getArguments() {
+		return this.validArguments;
+	}
+
+	@Override
+	public List<String> doExecute(String[] args) {
+		validateArguments(args, true);
 		Boolean keep = true;
 		Integer option = 0;
 
@@ -70,6 +82,7 @@ public class MachinesAdmin extends AbstractConsoleService {
 			}
 		}
 		new BSmySQL().closeConnection(conn);
+		return null;
 	}
 
 	private void refreshSerial(Connection conn) {
