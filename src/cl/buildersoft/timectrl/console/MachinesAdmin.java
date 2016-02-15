@@ -5,71 +5,89 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.util.List;
+import java.util.logging.Logger;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.exception.BSSystemException;
+import cl.buildersoft.framework.util.BSConnectionFactory;
 import cl.buildersoft.timectrl.api._zkemProxy;
-import cl.buildersoft.timectrl.business.beans.Group;
 import cl.buildersoft.timectrl.business.beans.Machine;
 import cl.buildersoft.timectrl.business.console.AbstractConsoleService;
+import cl.buildersoft.timectrl.business.process.AbstractProcess;
+import cl.buildersoft.timectrl.business.process.ExecuteProcess;
 import cl.buildersoft.timectrl.business.services.MachineService2;
 import cl.buildersoft.timectrl.business.services.impl.MachineServiceImpl2;
 import cl.buildersoft.timectrl.security.GenerateLicense;
 
-public class MachinesAdmin extends AbstractConsoleService {
+public class MachinesAdmin extends AbstractProcess implements ExecuteProcess {
+	private static final Logger LOG = Logger.getLogger(MachinesAdmin.class.getName());
+
+	private String[] validArguments = { "DOMAIN" };
 
 	public static void main(String[] args) {
 		try {
 			MachinesAdmin machinesAdmin = new MachinesAdmin();
-			machinesAdmin.init();
-			machinesAdmin.doWork(args);
+			// machinesAdmin.init();
+			machinesAdmin.doExecute(args);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	private void doWork(String[] args) {
+	@Override
+	protected String[] getArguments() {
+		return this.validArguments;
+	}
+
+	@Override
+	public List<String> doExecute(String[] args) {
+		validateArguments(args, true);
 		Boolean keep = true;
 		Integer option = 0;
 
 		BSBeanUtils bu = new BSBeanUtils();
-		Connection conn = getConnection();
+		BSConnectionFactory cf = new BSConnectionFactory();
+		Connection conn = cf.getConnection(args[0]);
 
-		while (keep) {
-			showMenu();
-			option = readOption();
-			switch (option) {
-			case 1: // Listar
-				listMachines(conn, bu);
-				break;
-			case 2: // Ingresar
-				Machine machine = readMachineByConsole(conn);
-				if (machine != null) {
-					bu.insert(conn, machine);
+		try {
+			while (keep) {
+				showMenu();
+				option = readOption();
+				switch (option) {
+				case 1: // Listar
+					listMachines(conn, bu);
+					break;
+				case 2: // Ingresar
+					Machine machine = readMachineByConsole(conn);
+					if (machine != null) {
+						bu.insert(conn, machine);
+					}
+					readString("Listo, presione ENTER y continue.");
+					// showMenu();
+					break;
+				case 3: // Actualizar serie
+					refreshSerial(conn);
+
+					break;
+				case 4: // Borrar
+					deleteMachine(conn, bu);
+
+					break;
+				case 5: // Salir
+					GenerateLicense gl = new GenerateLicense();
+					gl.generateLicense(conn, gl.getMaxDays().toString());
+					keep = false;
+					break;
+				default:
+					readString("Opcion incorrecta, presione ENTER.");
+					break;
 				}
-				readString("Listo, presione ENTER y continue.");
-				// showMenu();
-				break;
-			case 3: // Actualizar serie
-				refreshSerial(conn);
-
-				break;
-			case 4: // Borrar
-				deleteMachine(conn, bu);
-
-				break;
-			case 5: // Salir
-				GenerateLicense gl = new GenerateLicense();
-				gl.generateLicense(conn, this.getWebPath(), "" + gl.getMaxDays());
-				keep = false;
-				break;
-			default:
-				readString("Opcion incorrecta, presione ENTER.");
-				break;
 			}
+		} finally {
+			cf.closeConnection(conn);
 		}
-		new BSmySQL().closeConnection(conn);
+		return null;
 	}
 
 	private void refreshSerial(Connection conn) {
@@ -95,8 +113,8 @@ public class MachinesAdmin extends AbstractConsoleService {
 		if (bu.search(conn, machine)) {
 			MachineService2 service = new MachineServiceImpl2();
 
-			machine.setIp(machine.getIp());
-			machine.setPort(machine.getPort());
+			// machine.setIp(machine.getIp());
+			// machine.setPort(machine.getPort());
 
 			System.out.println("Buscando maquina '" + machine.getName() + "'...");
 
@@ -165,8 +183,6 @@ public class MachinesAdmin extends AbstractConsoleService {
 		}
 		return machine;
 	}
-
-	
 
 	private void listMachines(Connection conn, BSBeanUtils bu) {
 		@SuppressWarnings("unchecked")
