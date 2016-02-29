@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
+import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSSystemException;
 import cl.buildersoft.framework.util.BSConnectionFactory;
 import cl.buildersoft.timectrl.api._zkemProxy;
@@ -51,6 +52,11 @@ public class MachinesAdmin extends AbstractProcess implements ExecuteProcess {
 		BSConnectionFactory cf = new BSConnectionFactory();
 		Connection conn = cf.getConnection(domainKey);
 
+		init();
+		if(!licenseValidation(conn)){
+			throw new BSConfigurationException("License validation fail");
+		}
+		
 		try {
 			while (keep) {
 				showMenu();

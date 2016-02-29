@@ -31,7 +31,7 @@ public class BuildLicense extends AbstractProcess implements ExecuteProcess {
 
 	@Override
 	public List<String> doExecute(String[] args) {
-		validateArguments(args, true);
+		validateArguments(args, false);
 		String domainKey = args[0];
 
 		GenerateLicense gl = new GenerateLicense();
