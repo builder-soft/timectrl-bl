@@ -6,10 +6,8 @@ import java.util.Calendar;
 import java.util.List;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
-import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.exception.BSSystemException;
 import cl.buildersoft.framework.util.BSConfig;
-import cl.buildersoft.framework.util.BSConnectionFactory;
 import cl.buildersoft.framework.util.BSDateTimeUtil;
 import cl.buildersoft.framework.util.BSSecurity;
 import cl.buildersoft.timectrl.business.beans.Machine;
@@ -17,21 +15,22 @@ import cl.buildersoft.timectrl.business.beans.Machine;
 public class GenerateLicense {
 	private Integer maxDays = 90;
 
+	/**
+	 * <code>
 	public String generateLicense(String dsName, String days) {
 		BSConnectionFactory cf = new BSConnectionFactory();
 		Connection conn = cf.getConnection(dsName);
-		String out = generateLicense(conn, days);
+		String out = generateLicense(conn, days,null);
 		cf.closeConnection(conn);
 
 		return out;
 	}
-
-	public String generateLicense(Connection conn, String days) {
+</code>
+	 */
+	public String generateLicense(Connection conn, String days, String domainKey) {
 		validateDays(days);
 
 		BSBeanUtils bu = new BSBeanUtils();
-		// Connection conn = bu.getConnection("com.mysql.jdbc.Driver", server,
-		// database, password, user);
 
 		String serials = getSerialNumbers(bu, conn);
 
@@ -43,7 +42,7 @@ public class GenerateLicense {
 
 		BSConfig config = new BSConfig();
 
-		String licenseFile = config.fixPath(System.getenv("BS_PATH")) + "LicenseFile.dat";
+		String licenseFile = config.fixPath(System.getenv("BS_PATH")) + "license." + domainKey + ".dat";
 
 		PrintWriter writer = null;
 		try {

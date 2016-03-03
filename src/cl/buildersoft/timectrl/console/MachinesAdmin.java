@@ -8,12 +8,11 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
-import cl.buildersoft.framework.database.BSmySQL;
+import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSSystemException;
 import cl.buildersoft.framework.util.BSConnectionFactory;
 import cl.buildersoft.timectrl.api._zkemProxy;
 import cl.buildersoft.timectrl.business.beans.Machine;
-import cl.buildersoft.timectrl.business.console.AbstractConsoleService;
 import cl.buildersoft.timectrl.business.process.AbstractProcess;
 import cl.buildersoft.timectrl.business.process.ExecuteProcess;
 import cl.buildersoft.timectrl.business.services.MachineService2;
@@ -42,14 +41,22 @@ public class MachinesAdmin extends AbstractProcess implements ExecuteProcess {
 
 	@Override
 	public List<String> doExecute(String[] args) {
-		validateArguments(args, true);
+		validateArguments(args, false);
 		Boolean keep = true;
 		Integer option = 0;
 
+		String domainKey = args[0];
+		String days = null;//args.length == 2 ? args[1] : gl.getMaxDays().toString();
+
 		BSBeanUtils bu = new BSBeanUtils();
 		BSConnectionFactory cf = new BSConnectionFactory();
-		Connection conn = cf.getConnection(args[0]);
+		Connection conn = cf.getConnection(domainKey);
 
+		init();
+		if(!licenseValidation(conn)){
+			throw new BSConfigurationException("License validation fail");
+		}
+		
 		try {
 			while (keep) {
 				showMenu();
@@ -76,7 +83,10 @@ public class MachinesAdmin extends AbstractProcess implements ExecuteProcess {
 					break;
 				case 5: // Salir
 					GenerateLicense gl = new GenerateLicense();
-					gl.generateLicense(conn, gl.getMaxDays().toString());
+					
+					days = args.length == 2 ? args[1] : gl.getMaxDays().toString();
+					
+					gl.generateLicense(conn, days, domainKey);
 					keep = false;
 					break;
 				default:
