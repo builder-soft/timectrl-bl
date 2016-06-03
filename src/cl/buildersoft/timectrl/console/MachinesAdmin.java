@@ -52,6 +52,7 @@ public class MachinesAdmin extends AbstractProcess implements ExecuteProcess {
 		BSConnectionFactory cf = new BSConnectionFactory();
 		Connection conn = cf.getConnection(domainKey);
 
+		this.setDSName(domainKey);
 		init();
 		if(!licenseValidation(conn)){
 			throw new BSConfigurationException("License validation fail");
@@ -101,7 +102,7 @@ public class MachinesAdmin extends AbstractProcess implements ExecuteProcess {
 	}
 
 	private void refreshSerial(Connection conn) {
-		if (confirm("¿Desea refrescar la serie de todas las maquinas?")) {
+		if (confirm("Â¿Desea refrescar la serie de todas las maquinas?")) {
 			BSBeanUtils bu = new BSBeanUtils();
 			@SuppressWarnings("unchecked")
 			List<Machine> machines = (List<Machine>) bu.listAll(conn, new Machine());
