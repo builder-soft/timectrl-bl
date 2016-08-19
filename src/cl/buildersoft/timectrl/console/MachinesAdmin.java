@@ -11,7 +11,7 @@ import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSSystemException;
 import cl.buildersoft.framework.util.BSConnectionFactory;
-import cl.buildersoft.timectrl.api._zkemProxy;
+import cl.buildersoft.timectrl.api.com4j._zkemProxy;
 import cl.buildersoft.timectrl.business.beans.Machine;
 import cl.buildersoft.timectrl.business.process.AbstractProcess;
 import cl.buildersoft.timectrl.business.process.ExecuteProcess;
@@ -52,6 +52,7 @@ public class MachinesAdmin extends AbstractProcess implements ExecuteProcess {
 		BSConnectionFactory cf = new BSConnectionFactory();
 		Connection conn = cf.getConnection(domainKey);
 
+		this.setDSName(domainKey);
 		init();
 		if(!licenseValidation(conn)){
 			throw new BSConfigurationException("License validation fail");
@@ -101,7 +102,7 @@ public class MachinesAdmin extends AbstractProcess implements ExecuteProcess {
 	}
 
 	private void refreshSerial(Connection conn) {
-		if (confirm("¿Desea refrescar la serie de todas las maquinas?")) {
+		if (confirm("Â¿Desea refrescar la serie de todas las maquinas?")) {
 			BSBeanUtils bu = new BSBeanUtils();
 			@SuppressWarnings("unchecked")
 			List<Machine> machines = (List<Machine>) bu.listAll(conn, new Machine());
